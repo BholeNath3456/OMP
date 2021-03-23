@@ -9,6 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,6 +24,8 @@ import android.widget.Button;
 public class MyAccountFragment extends Fragment {
     public static final int MANAGE_ADDRESS=1;
     private Button viewAllAddressBtn;
+    private CircleImageView profileView;
+    private TextView name,email;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -64,6 +72,15 @@ public class MyAccountFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_my_account, container, false);
+        profileView=view.findViewById(R.id.profile_image);
+        name=view.findViewById(R.id.username);
+        email=view.findViewById(R.id.user_email);
+        name.setText(DBqueries.name);
+        email.setText(DBqueries.email);
+        if (!DBqueries.profile.isEmpty()) {
+            Glide.with(getContext()).load(DBqueries.profile).apply(new RequestOptions().placeholder(R.drawable.profile_placeholder)).into(profileView);
+
+        }
         viewAllAddressBtn=view.findViewById(R.id.view_all_addresses_btn);
         viewAllAddressBtn.setOnClickListener(new View.OnClickListener() {
             @Override

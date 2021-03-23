@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     // User Profile..
     private CircleImageView userProfile;
     private TextView userName, userEmail;
+    private ImageView profileIcon;
     // User Profile..
 
 
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         userProfile = navigationView.getHeaderView(0).findViewById(R.id.main_profile_image);
         userName = navigationView.getHeaderView(0).findViewById(R.id.main_fullname);
         userEmail = navigationView.getHeaderView(0).findViewById(R.id.main_email);
-
+        profileIcon = navigationView.getHeaderView(0).findViewById(R.id.addProfileIcon);
         if (showCart) {
             drawer.setDrawerLockMode(1);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -216,8 +217,13 @@ public class MainActivity extends AppCompatActivity {
                         DBqueries.profile = task.getResult().get("profile").toString();
                         userName.setText(DBqueries.name);
                         userEmail.setText(DBqueries.email);
-                        Glide.with(MainActivity.this).load(DBqueries.profile).apply(new RequestOptions().placeholder(R.drawable.profile_placeholder)).into(userProfile);
-                        Log.d(TAG, "onComplete: gettting Name and Email.. " + DBqueries.email + DBqueries.name);
+                        if (DBqueries.profile.isEmpty()) {
+                             profileIcon.setVisibility(View.VISIBLE);
+                        } else {
+                            profileIcon.setVisibility(View.INVISIBLE);
+                            Glide.with(MainActivity.this).load(DBqueries.profile).apply(new RequestOptions().placeholder(R.drawable.profile_placeholder)).into(userProfile);
+                            Log.d(TAG, "onComplete: gettting Name and Email.. " + DBqueries.email + DBqueries.name);
+                        }
                     } else {
                         String error = task.getException().getMessage();
                         Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
