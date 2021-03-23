@@ -21,7 +21,7 @@ import java.util.List;
 
 public class DBqueries {
     public static FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-    public static String email, fullname, profile;
+    public static String email, name, profile;
     public static List<CategoryModel> categoryModelList = new ArrayList<CategoryModel>();
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();

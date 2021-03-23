@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
@@ -53,6 +54,7 @@ import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     private FrameLayout frameLayout;
     private FirebaseUser currentUser;
@@ -70,7 +72,10 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private Dialog signInDialog;
     public static DrawerLayout drawer;
-
+    // User Profile..
+    private CircleImageView userProfile;
+    private TextView userName, userEmail;
+    // User Profile..
 
 
     @SuppressLint("WrongConstant")
@@ -88,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(0).setChecked(true);
         frameLayout = findViewById(R.id.main_framelayout);
+
+        userProfile = navigationView.getHeaderView(0).findViewById(R.id.main_profile_image);
+        userName = navigationView.getHeaderView(0).findViewById(R.id.main_fullname);
+        userEmail = navigationView.getHeaderView(0).findViewById(R.id.main_email);
 
         if (showCart) {
             drawer.setDrawerLockMode(1);
@@ -197,6 +206,26 @@ public class MainActivity extends AppCompatActivity {
 
             navigationView.getMenu().getItem(navigationView.getMenu().size() - 1).setEnabled(false);
         } else {
+            FirebaseFirestore.getInstance().collection("USERS").document(currentUser.getUid())
+                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DBqueries.email = task.getResult().get("email").toString();
+                        DBqueries.name = task.getResult().get("name").toString();
+                        DBqueries.profile = task.getResult().get("profile").toString();
+                        userName.setText(DBqueries.name);
+                        userEmail.setText(DBqueries.email);
+                        Glide.with(MainActivity.this).load(DBqueries.profile).apply(new RequestOptions().placeholder(R.drawable.profile_placeholder)).into(userProfile);
+                        Log.d(TAG, "onComplete: gettting Name and Email.. " + DBqueries.email + DBqueries.name);
+                    } else {
+                        String error = task.getException().getMessage();
+                        Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+
             navigationView.getMenu().getItem(navigationView.getMenu().size() - 1).setEnabled(true);
         }
 
@@ -290,34 +319,6 @@ public class MainActivity extends AppCompatActivity {
             navigationView.getMenu().getItem(3).setChecked(true);
         }
     }
-
-//    @Override
-//    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-//
-//        int id = item.getItemId();
-//        if (id == R.id.nav_my_mall) {
-//            actionBarLogo.setVisibility(View.VISIBLE);
-//            invalidateOptionsMenu();
-//            setFragment(new HomeFragment(), HOME_FRAGMENT);
-//        } else if (id == R.id.nav_my_orders) {
-//
-//        } else if (id == R.id.nav_my_rewards) {
-//
-//        } else if (id == R.id.nav_my_cart) {
-//
-//            myCart();
-//            return true;
-//        } else if (id == R.id.nav_my_wishlist) {
-//
-//        } else if (id == R.id.nav_my_account) {
-//
-//        } else if (id == R.id.nav_my_signout) {
-//
-//        }
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        drawer.closeDrawer(GravityCompat.START);
-//        return true;
-//    }
 
     private void setFragment(Fragment fragment, int fragmentNo) {
 
