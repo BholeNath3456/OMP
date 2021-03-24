@@ -102,7 +102,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private String product_ID;
     private FirebaseUser currentUser;
-    public static List<UserWishListProductModel> userWishListProductModelList =new ArrayList<>();
+    public static List<UserWishListProductModel> userWishListProductModelList = new ArrayList<>();
 
 
     @Override
@@ -387,27 +387,27 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
 
     }
-    public static void  addWishListInFireBase(String product_ID){
+
+    public static void addWishListInFireBase(String product_ID) {
         Map<String, Object> updateList = new HashMap<>();
         Map<String, Object> updateProduct = new HashMap<>();
-        String id=product_ID;
+        String id = product_ID;
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                int i=Integer.parseInt(task.getResult().get("list_size").toString())+1;
-              // userWishListProductModelList.add(new UserWishListProductModel((int) task.getResult().get("list_size")+1,id));
-                updateList.put("list_size", (long) task.getResult().get("list_size")+1);
-                updateProduct.put("product_ID_"+i,id);
+                int i = Integer.parseInt(task.getResult().get("list_size").toString()) + 1;
+                // userWishListProductModelList.add(new UserWishListProductModel((int) task.getResult().get("list_size")+1,id));
+                updateList.put("list_size", (long) task.getResult().get("list_size") + 1);
+                updateProduct.put("product_ID_" + i, id);
                 FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                         .update(updateList);
                 FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                         .update(updateProduct);
-                Log.d(TAG, "onComplete: Added To Wishlist"+ updateList+"  "+updateProduct);
+                Log.d(TAG, "onComplete: Added To Wishlist" + updateList + "  " + updateProduct);
             }
         });
     }
-
 
 
     @Override
@@ -416,6 +416,32 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
         if (currentUser != null) {
             coupenRedemptionLayout.setVisibility(View.VISIBLE);
+
+            FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        long listSize = (long) task.getResult().get("list_size");
+                        for (long x = 1; x <= listSize; x++) {
+                            String id = task.getResult().get("product_ID_"+x).toString();
+                            if(id.equals(product_ID)) {
+                                Log.d(TAG, "onComplete: " + product_ID);
+                                Log.d(TAG, "onComplete: Accessing Id.." + id);
+                                addToWishlistBtn.setSupportImageTintList(getResources().getColorStateList(R.color.red));
+                            }
+                        }
+                    } else {
+                        String error = task.getException().getMessage();
+                        Toast.makeText(ProductDetailsActivity.this, error, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+
+
+
+
         }
 
     }

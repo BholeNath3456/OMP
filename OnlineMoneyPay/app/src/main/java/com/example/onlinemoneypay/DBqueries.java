@@ -8,11 +8,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -23,11 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 public class DBqueries {
+    private static final String TAG = "DBqueries";
     public static FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     public static String email, name, profile;
     public static List<CategoryModel> categoryModelList = new ArrayList<CategoryModel>();
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();
+    public static List<String> userWishListProductModelList = new ArrayList<>();
 
 
     public static void loadCategories(RecyclerView categoryRecyclerView, Context context) {
@@ -134,19 +139,10 @@ public class DBqueries {
                 });
     }
 
-    public static void  addWishList( Context context, String productID){
-        Map<String, Object> updateList = new HashMap<>();
-        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                updateList.put("list_size", (long) task.getResult().get("list_size")+1);
-              //  userWishListProductModelList.add(new UserWishListProductModel((long) task.getResult().get("list_size")+1,productID));
-            }
-        });
-    }
 
     public static void removeWishlist(Context context, String productID) {
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
+        Map<String, Object> updates = new HashMap<>();
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -154,20 +150,100 @@ public class DBqueries {
                 DocumentSnapshot documentSnapshot = task.getResult();
                 if (task.isSuccessful()) {
                     long listSize = (long) task.getResult().get("list_size");
-                    //  String id = task.getResult().get("product_ID_1").toString();
-                    for (long x = 1; x <= listSize; x++) {
-                        String id = task.getResult().get("product_ID_" + x).toString();
-                        if(id.equals(productID)){
-
+                    int intlist = Integer.parseInt(String.valueOf(listSize));
+                    userWishListProductModelList.clear();
+                    for (int x = 1; x <= intlist; x++) {
+                      userWishListProductModelList.add(documentSnapshot.get("product_ID_" + x).toString());
+                        Log.d(TAG, "Original List: "+documentSnapshot.get("product_ID_" + x).toString());
+                    }
+                    for(int i=0;i<intlist;i++) {
+                        int j=i+1;
+                        String id = task.getResult().get("product_ID_" + j).toString();
+                        if (id.equals(productID)) {
+                            userWishListProductModelList.remove(j);
+                            Log.d(TAG, "This is Remove " + userWishListProductModelList.get(i));
+                            break;
                         }
                     }
+                    intlist--;
+                    for(int i=0;i<intlist;i++) {
+                        Log.d(TAG, "After remove " + userWishListProductModelList.get(i));
+                    }
+
                 } else {
                     String error = task.getException().getMessage();
                     Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
     }
 
 
 }
+
+//for (int x = 1; x <= intlist; x++) {
+//        String id = task.getResult().get("product_ID_" + x).toString();
+//        if (id.equals(productID)) {
+//        userWishListProductModelList.remove(x);
+//                            updates.put("product_ID_" + x, FieldValue.delete());
+//                           docRef.update(updates);
+//        break;
+//        }
+//        }
+//        listSize--;
+//        for (int x = 1; x <= listSize; x++) {
+//        Log.d(TAG, "After Remove " + userWishListProductModelList.get(x));
+//        //   updates.put();
+//        }
+
+
+//
+//
+// if (id.equals(productID)) {
+//         DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
+//         Map<String, Object> updates = new HashMap<>();
+//        updates.put("product_ID_" + x, FieldValue.delete());
+//        docRef.update(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
+//@Override
+//public void onComplete(@NonNull Task<Void> task) {
+//
+//        }
+//        });
+//        }
+
+
+//    public static void removeWishlist(Context context, String productID) {
+//        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+//                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    long listSize = (long) task.getResult().get("list_size");
+//                    for (long x = 1; x <= listSize; x++) {
+//                        String id = task.getResult().get("product_ID_" + x).toString();
+//                        if (id.equals(productID)) {
+//                            DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
+//
+//                            // Remove the 'capital' field from the document
+//                            Map<String, Object> updates = new HashMap<>();
+//                            updates.put("product_ID_" + x, FieldValue.delete());
+//
+//                            docRef.update(updates).addOnCanceledListener(new OnCanceledListener() {
+//                                @Override
+//                                public void onCanceled() {
+//                                    Log.d(TAG, "Deleted Successfully" );
+//                                }
+//                            });
+//                        }
+//                    }
+//                } else{
+//                    String error = task.getException().getMessage();
+//                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
+//
+//    }
+
+
