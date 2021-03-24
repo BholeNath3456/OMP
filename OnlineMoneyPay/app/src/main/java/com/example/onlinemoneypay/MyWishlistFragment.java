@@ -2,18 +2,26 @@ package com.example.onlinemoneypay;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.onlinemoneypay.DBqueries.wishlistModelList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,9 +29,11 @@ import static com.example.onlinemoneypay.DBqueries.wishlistModelList;
  * create an instance of this fragment.
  */
 public class MyWishlistFragment extends Fragment {
+    private static final String TAG = "MyWishlistFragment";
 
     private RecyclerView wishlistRecyclerView;
-
+    private List<WishlistModel> wishlistModelList = new ArrayList<>();
+    private WishlistAdapter wishlistAdapter = new WishlistAdapter(wishlistModelList, true);
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -64,23 +74,67 @@ public class MyWishlistFragment extends Fragment {
         }
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_my_wishlist, container, false);
         wishlistRecyclerView = view.findViewById(R.id.my_wishlist_recyclerview);
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getContext());
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         wishlistRecyclerView.setLayoutManager(linearLayoutManager);
 
-       // List<WishlistModel> wishlistModelList=new ArrayList<>();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    long listSize = (long) task.getResult().get("list_size");
+                    //  String id = task.getResult().get("product_ID_1").toString();
+                    for (long x = 1; x <= listSize; x++) {
+
+                        String id = task.getResult().get("product_ID_" + x).toString();
+                        /// /////////  loop start...
+                        FirebaseFirestore.getInstance().collection("PRODUCTS").document(id)
+                                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                if (task.isSuccessful()) {
+                                    wishlistModelList.add(new WishlistModel(documentSnapshot.get("product_ID").toString()
+                                            , documentSnapshot.get("product_image_1").toString()
+                                            , documentSnapshot.get("product_title").toString()
+                                            , (long) documentSnapshot.get("free_coupens")
+                                            , documentSnapshot.get("average_rating").toString()
+                                            , (long) documentSnapshot.get("total_ratings")
+                                            , documentSnapshot.get("product_price").toString()
+                                            , documentSnapshot.get("cutted_price").toString()
+                                            , (boolean) documentSnapshot.get("COD")));
+                                } else {
+                                    String error = task.getException().getMessage();
+                                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                                }
+
+                                wishlistRecyclerView.setAdapter(wishlistAdapter);
+                                wishlistAdapter.notifyDataSetChanged();
+                            }
+                        });
+                        Log.d(TAG, "onComplete: " + listSize + id);
+
+                    }
+                    ////////////////////////////// looping
 
 
 
-        WishlistAdapter wishlistAdapter=new WishlistAdapter(wishlistModelList,true);
-        wishlistRecyclerView.setAdapter(wishlistAdapter);
-        wishlistAdapter.notifyDataSetChanged();
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         return view;
     }

@@ -25,7 +25,6 @@ public class DBqueries {
     public static List<CategoryModel> categoryModelList = new ArrayList<CategoryModel>();
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();
-    public static List<WishlistModel> wishlistModelList = new ArrayList<>();
 
     public static void loadCategories(RecyclerView categoryRecyclerView, Context context) {
 
@@ -79,6 +78,7 @@ public class DBqueries {
 
 
                                 } else if ((long) documentSnapshot.get("view_type") == 2) {
+
                                     List<WishlistModel> viewAllProductList = new ArrayList<>();
                                     List<HorizontalProductScrollModel> horizontalProductScrollModelList = new ArrayList<>();
                                     long no_of_products = (long) documentSnapshot.get("no_of_products");
@@ -95,12 +95,12 @@ public class DBqueries {
                                                 , documentSnapshot.get("cutted_price_" + x).toString()
                                                 , (boolean) documentSnapshot.get("COD_" + x)));
 
+
                                     }
                                     lists.get(index).add(new HomePageModel(2, documentSnapshot.get("layout_title").toString(), documentSnapshot.get("layout_background").toString(), horizontalProductScrollModelList, viewAllProductList));
 
 
                                 } else if ((long) documentSnapshot.get("view_type") == 3) {
-                                    List<WishlistModel> wishlistModelList = new ArrayList<>();
                                     List<HorizontalProductScrollModel> GridLayoutModelList = new ArrayList<>();
                                     long no_of_products = (long) documentSnapshot.get("no_of_products");
                                     for (long x = 1; x <= no_of_products; x++) {
@@ -129,20 +129,5 @@ public class DBqueries {
                     }
                 });
     }
-    public static  void loadWishList(Context context){
-           firebaseFirestore.collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
-           .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-               @Override
-               public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-               if (task.isSuccessful()){
-
-               }else {
-                   String error = task.getException().getMessage();
-                   Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-               }
-
-               }
-           });
-     }
 
 }
