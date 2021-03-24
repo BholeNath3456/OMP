@@ -32,8 +32,8 @@ public class MyWishlistFragment extends Fragment {
     private static final String TAG = "MyWishlistFragment";
 
     private RecyclerView wishlistRecyclerView;
-    private List<WishlistModel> wishlistModelList = new ArrayList<>();
-    private WishlistAdapter wishlistAdapter = new WishlistAdapter(wishlistModelList, true);
+    public static List<WishlistModel> wishlistModelList = new ArrayList<>();
+    public static WishlistAdapter wishlistAdapter = new WishlistAdapter(wishlistModelList, true);
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -84,7 +84,9 @@ public class MyWishlistFragment extends Fragment {
         wishlistRecyclerView = view.findViewById(R.id.my_wishlist_recyclerview);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        wishlistRecyclerView.clearOnChildAttachStateChangeListeners();
         wishlistRecyclerView.setLayoutManager(linearLayoutManager);
+        wishlistModelList.clear();
 
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

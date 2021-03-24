@@ -1,6 +1,7 @@
 package com.example.onlinemoneypay;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,7 +18,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DBqueries {
     public static FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
@@ -25,6 +28,7 @@ public class DBqueries {
     public static List<CategoryModel> categoryModelList = new ArrayList<CategoryModel>();
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();
+
 
     public static void loadCategories(RecyclerView categoryRecyclerView, Context context) {
 
@@ -129,5 +133,41 @@ public class DBqueries {
                     }
                 });
     }
+
+    public static void  addWishList( Context context, String productID){
+        Map<String, Object> updateList = new HashMap<>();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                updateList.put("list_size", (long) task.getResult().get("list_size")+1);
+              //  userWishListProductModelList.add(new UserWishListProductModel((long) task.getResult().get("list_size")+1,productID));
+            }
+        });
+    }
+
+    public static void removeWishlist(Context context, String productID) {
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (task.isSuccessful()) {
+                    long listSize = (long) task.getResult().get("list_size");
+                    //  String id = task.getResult().get("product_ID_1").toString();
+                    for (long x = 1; x <= listSize; x++) {
+                        String id = task.getResult().get("product_ID_" + x).toString();
+                        if(id.equals(productID)){
+
+                        }
+                    }
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
 }

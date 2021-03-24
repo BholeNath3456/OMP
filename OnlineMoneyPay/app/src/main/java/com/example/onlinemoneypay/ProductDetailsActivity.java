@@ -35,7 +35,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.onlinemoneypay.MainActivity.showCart;
 import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
@@ -100,6 +102,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private String product_ID;
     private FirebaseUser currentUser;
+    public static List<UserWishListProductModel> userWishListProductModelList =new ArrayList<>();
 
 
     @Override
@@ -232,7 +235,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     } else {
                         ALREADY_ADDED_TO_WISHLIST = true;
                         addToWishlistBtn.setSupportImageTintList(getResources().getColorStateList(R.color.red));
-
+                        addWishListInFireBase(product_ID);
                     }
                 }
             }
@@ -384,6 +387,28 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
 
     }
+    public static void  addWishListInFireBase(String product_ID){
+        Map<String, Object> updateList = new HashMap<>();
+        Map<String, Object> updateProduct = new HashMap<>();
+        String id=product_ID;
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                int i=Integer.parseInt(task.getResult().get("list_size").toString())+1;
+              // userWishListProductModelList.add(new UserWishListProductModel((int) task.getResult().get("list_size")+1,id));
+                updateList.put("list_size", (long) task.getResult().get("list_size")+1);
+                updateProduct.put("product_ID_"+i,id);
+                FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                        .update(updateList);
+                FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                        .update(updateProduct);
+                Log.d(TAG, "onComplete: Added To Wishlist"+ updateList+"  "+updateProduct);
+            }
+        });
+    }
+
+
 
     @Override
     protected void onStart() {
