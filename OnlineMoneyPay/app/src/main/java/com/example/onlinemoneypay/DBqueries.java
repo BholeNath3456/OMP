@@ -32,7 +32,7 @@ public class DBqueries {
     public static List<CategoryModel> categoryModelList = new ArrayList<CategoryModel>();
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();
-    public static List<String> userWishListProductModelList = new ArrayList<>();
+    public static List<String> idList = new ArrayList<>();
 
 
     public static void loadCategories(RecyclerView categoryRecyclerView, Context context) {
@@ -151,24 +151,33 @@ public class DBqueries {
                 if (task.isSuccessful()) {
                     long listSize = (long) task.getResult().get("list_size");
                     int intlist = Integer.parseInt(String.valueOf(listSize));
-                    userWishListProductModelList.clear();
+                    idList.clear();
                     for (int x = 1; x <= intlist; x++) {
-                      userWishListProductModelList.add(documentSnapshot.get("product_ID_" + x).toString());
-                        Log.d(TAG, "Original List: "+documentSnapshot.get("product_ID_" + x).toString());
+                        idList.add(documentSnapshot.get("product_ID_" + x).toString());
+                        Log.d(TAG, "Original List: " + documentSnapshot.get("product_ID_" + x).toString());
                     }
-                    for(int i=0;i<intlist;i++) {
-                        int j=i+1;
-                        String id = task.getResult().get("product_ID_" + j).toString();
-                        if (id.equals(productID)) {
-                            userWishListProductModelList.remove(j);
-                            Log.d(TAG, "This is Remove " + userWishListProductModelList.get(i));
+
+                    for (int i = 0; i < intlist; i++) {
+                        String id = idList.get(i);
+                        if (id.contentEquals(productID)) {
+                            Log.d(TAG, "This is Remove " + idList.get(i));
+                            idList.remove(i);
                             break;
                         }
                     }
                     intlist--;
-                    for(int i=0;i<intlist;i++) {
-                        Log.d(TAG, "After remove " + userWishListProductModelList.get(i));
+                    for (int i = 0; i < idList.size(); i++) {
+                         int j=i+1;
+                        updates.put("product_ID_" +j, idList.get(i));
+                        docRef.update(updates);
+                        Log.d(TAG, "After remove " + idList.get(i));
                     }
+
+                    updates.put("list_size", intlist);
+                    docRef.update(updates);
+
+                    updates.put("product_ID_" +listSize, FieldValue.delete());
+                    docRef.update(updates);
 
                 } else {
                     String error = task.getException().getMessage();

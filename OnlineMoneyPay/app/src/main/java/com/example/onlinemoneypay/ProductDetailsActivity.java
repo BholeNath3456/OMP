@@ -231,6 +231,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     if (ALREADY_ADDED_TO_WISHLIST) {
                         ALREADY_ADDED_TO_WISHLIST = false;
                         addToWishlistBtn.setSupportImageTintList(ColorStateList.valueOf(Color.parseColor("#9e9e9e")));
+                        DBqueries.removeWishlist(ProductDetailsActivity.this,product_ID);
 
                     } else {
                         ALREADY_ADDED_TO_WISHLIST = true;

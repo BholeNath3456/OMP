@@ -120,6 +120,8 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    DBqueries.removeWishlist ( itemView.getContext(),productid);
+
                     Toast.makeText(itemView.getContext(), "Deleted", Toast.LENGTH_SHORT).show();
                 }
             });

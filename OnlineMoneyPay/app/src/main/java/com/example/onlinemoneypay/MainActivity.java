@@ -291,7 +291,6 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.main_search_icon) {
             // to do search..
-            DBqueries.removeWishlist(MainActivity.this,"BKDwj3eeDEjC0cXoPnxy");
             Toast.makeText(this, "Search", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.main_notification_icon) {
