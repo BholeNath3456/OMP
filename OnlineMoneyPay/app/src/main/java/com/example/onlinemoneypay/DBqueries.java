@@ -141,6 +141,7 @@ public class DBqueries {
 
 
     public static void removeWishlist(Context context, String productID) {
+        ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST=false;
         DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
         Map<String, Object> updates = new HashMap<>();
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")

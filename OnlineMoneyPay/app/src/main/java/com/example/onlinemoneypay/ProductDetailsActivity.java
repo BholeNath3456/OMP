@@ -97,7 +97,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private Button buyNowBtn;
 
     private FloatingActionButton addToWishlistBtn;
-    private static boolean ALREADY_ADDED_TO_WISHLIST = false;
+    public static boolean ALREADY_ADDED_TO_WISHLIST = false;
 
     private FirebaseFirestore firebaseFirestore;
     private String product_ID;
@@ -229,10 +229,9 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     signInDialog.show();
                 } else {
                     if (ALREADY_ADDED_TO_WISHLIST) {
+                        DBqueries.removeWishlist(ProductDetailsActivity.this,product_ID);
                         ALREADY_ADDED_TO_WISHLIST = false;
                         addToWishlistBtn.setSupportImageTintList(ColorStateList.valueOf(Color.parseColor("#9e9e9e")));
-                        DBqueries.removeWishlist(ProductDetailsActivity.this,product_ID);
-
                     } else {
                         ALREADY_ADDED_TO_WISHLIST = true;
                         addToWishlistBtn.setSupportImageTintList(getResources().getColorStateList(R.color.red));
