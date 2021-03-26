@@ -33,6 +33,8 @@ public class DBqueries {
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();
     public static List<String> idList = new ArrayList<>();
+    public static List<String> myRatedIds = new ArrayList<>();
+    public static List<Long> myRating = new ArrayList<>();
 
 
     public static void loadCategories(RecyclerView categoryRecyclerView, Context context) {
@@ -141,7 +143,7 @@ public class DBqueries {
 
 
     public static void removeWishlist(Context context, String productID) {
-        ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST=false;
+        ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST = false;
         DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
         Map<String, Object> updates = new HashMap<>();
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
@@ -168,8 +170,8 @@ public class DBqueries {
                     }
                     intlist--;
                     for (int i = 0; i < idList.size(); i++) {
-                         int j=i+1;
-                        updates.put("product_ID_" +j, idList.get(i));
+                        int j = i + 1;
+                        updates.put("product_ID_" + j, idList.get(i));
                         docRef.update(updates);
                         Log.d(TAG, "After remove " + idList.get(i));
                     }
@@ -177,7 +179,7 @@ public class DBqueries {
                     updates.put("list_size", intlist);
                     docRef.update(updates);
 
-                    updates.put("product_ID_" +listSize, FieldValue.delete());
+                    updates.put("product_ID_" + listSize, FieldValue.delete());
                     docRef.update(updates);
 
                 } else {
@@ -189,71 +191,30 @@ public class DBqueries {
 
     }
 
+    public static void loadRatingList(Context context,String productID) {
+        myRatedIds.clear();
+        myRating.clear();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_RATINGS")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    for(long x=0 ; x< (long)task.getResult().get("list_size"); x++){
+                        myRatedIds.add(task.getResult().get("product_ID_"+x).toString());
+                        myRating.add((long)task.getResult().get("rating_"+x));
+                        if(task.getResult().get("product_ID_"+x).toString().contentEquals(productID)&& ProductDetailsActivity.rateNowContainer!=null){
+                            ProductDetailsActivity.setRating(Integer.parseInt(String.valueOf((long)task.getResult().get("rating_"+x)))-1);
+                        }
+                    }
+                }else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
 
+                }
+            }
+        });
+
+
+    }
 }
-
-//for (int x = 1; x <= intlist; x++) {
-//        String id = task.getResult().get("product_ID_" + x).toString();
-//        if (id.equals(productID)) {
-//        userWishListProductModelList.remove(x);
-//                            updates.put("product_ID_" + x, FieldValue.delete());
-//                           docRef.update(updates);
-//        break;
-//        }
-//        }
-//        listSize--;
-//        for (int x = 1; x <= listSize; x++) {
-//        Log.d(TAG, "After Remove " + userWishListProductModelList.get(x));
-//        //   updates.put();
-//        }
-
-
-//
-//
-// if (id.equals(productID)) {
-//         DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
-//         Map<String, Object> updates = new HashMap<>();
-//        updates.put("product_ID_" + x, FieldValue.delete());
-//        docRef.update(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
-//@Override
-//public void onComplete(@NonNull Task<Void> task) {
-//
-//        }
-//        });
-//        }
-
-
-//    public static void removeWishlist(Context context, String productID) {
-//        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
-//                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                if (task.isSuccessful()) {
-//                    long listSize = (long) task.getResult().get("list_size");
-//                    for (long x = 1; x <= listSize; x++) {
-//                        String id = task.getResult().get("product_ID_" + x).toString();
-//                        if (id.equals(productID)) {
-//                            DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
-//
-//                            // Remove the 'capital' field from the document
-//                            Map<String, Object> updates = new HashMap<>();
-//                            updates.put("product_ID_" + x, FieldValue.delete());
-//
-//                            docRef.update(updates).addOnCanceledListener(new OnCanceledListener() {
-//                                @Override
-//                                public void onCanceled() {
-//                                    Log.d(TAG, "Deleted Successfully" );
-//                                }
-//                            });
-//                        }
-//                    }
-//                } else{
-//                    String error = task.getException().getMessage();
-//                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-//
-//    }
-
 
