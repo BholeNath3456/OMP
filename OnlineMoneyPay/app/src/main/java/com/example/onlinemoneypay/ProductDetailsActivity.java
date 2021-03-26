@@ -281,19 +281,64 @@ public class ProductDetailsActivity extends AppCompatActivity {
                             if (DBqueries.myRatedIds.contains(product_ID)) {
                                  TextView oldRating=(TextView)ratingsNoContainer.getChildAt(5-initialRating-1);
                                  TextView finalRating=(TextView)ratingsNoContainer.getChildAt(5-starPosition-1);
+                                 Map<String, Object> updateRating=new HashMap<>();
+                                 updateRating.put(initialRating-1+"_star",Long.parseLong(oldRating.getText().toString())-1);
+                                 updateRating.put(starPosition+1+"_star",Long.parseLong(finalRating.getText().toString())+1);
+                                 firebaseFirestore.collection("PRODUCTS").document(product_ID)
+                                        .update(updateRating).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                     @Override
+                                     public void onComplete(@NonNull Task<Void> task) {
+                                         if(task.isSuccessful()){
 
+                                             Map<String, Object> rating = new HashMap<>();
+                                             rating.put("list_size",(long)DBqueries.myRatedIds.size()+1);
+                                             rating.put("product_ID_" + DBqueries.myRatedIds.size(), product_ID);
+                                             rating.put("rating_" + DBqueries.myRatedIds.size(), (long) starPosition + 1);
 
-                                Map<String, Object> updateRating=new HashMap<>();
-                                updateRating.put(initialRating-1+"_star",Long.parseLong(oldRating.getText().toString())-1);
-                                updateRating.put(starPosition+1+"_star",Long.parseLong(finalRating.getText().toString())+1);
-                                firebaseFirestore.collection("PRODUCTS").document(product_ID)
-                                        .update(updateRating);
+                                             firebaseFirestore.collection("USERS").document(currentUser.getUid()).collection("USER_DATA").document("MY_RATINGS")
+                                                     .update(rating).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                 @Override
+                                                 public void onComplete(@NonNull Task<Void> task) {
+                                                     if (task.isSuccessful()) {
+                                                         DBqueries.myRatedIds.add(product_ID);
+                                                         DBqueries.myRating.add((long)starPosition+1);
+                                                         TextView rating = (TextView) ratingsNoContainer.getChildAt(5-starPosition-1);
+                                                         rating.setText(String.valueOf(Integer.parseInt(rating.getText().toString())+1));
+
+                                                    //     totalRatingMiniView.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ")ratings");
+                                                    //     totalRatings.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ") ratings");
+                                                     //    totalRatingsFigure.setText(String.valueOf((long) documentSnapshot.get("total_ratings")+1));
+
+                                                  //       averageRating.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
+                                                    //     averageRatingMiniView.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
+
+                                                         for (int x = 0; x < 5; x++) {
+                                                             TextView ratingfigures = (TextView) ratingsNoContainer.getChildAt(x);
+                                                             ProgressBar progressBar = (ProgressBar) ratingsProgressBarContainer.getChildAt(x);
+                                                             int maxProgress = Integer.parseInt(String.valueOf((long) documentSnapshot.get("total_ratings")+1));
+                                                             progressBar.setMax(maxProgress);
+                                                             progressBar.setProgress(Integer.parseInt(ratingfigures.getText().toString()));
+                                                         }
+                                                         Toast.makeText(ProductDetailsActivity.this, "Thank you! for rating.", Toast.LENGTH_SHORT).show();
+
+                                                     } else {
+                                                         setRating(initialRating);
+                                                         String error = task.getException().getMessage();
+                                                         Toast.makeText(ProductDetailsActivity.this, error, Toast.LENGTH_SHORT).show();
+                                                     }
+                                                 }
+                                             });
+                                         }else {
+
+                                         }
+                                     }
+                                 });
                             } else {
 
                                 Map<String, Object> productRating = new HashMap<>();
                                 productRating.put(starPosition + 1 + "_star", (long) documentSnapshot.get(starPosition + 1 + "_star") + 1);
-                                productRating.put("average_rating", calculateAverageRating(starPosition + 1));
-                                productRating.put("total_ratings", (long) documentSnapshot.get("total_ratings") + 1);
+                             //   productRating.put("average_rating", calculateAverageRating(starPosition + 1));
+                                //  productRating.put("total_ratings", (long) documentSnapshot.get("total_ratings") + 1);
 
 
                                 firebaseFirestore.collection("PRODUCTS").document(product_ID)
@@ -317,12 +362,12 @@ public class ProductDetailsActivity extends AppCompatActivity {
                                                         TextView rating = (TextView) ratingsNoContainer.getChildAt(5-starPosition-1);
                                                         rating.setText(String.valueOf(Integer.parseInt(rating.getText().toString())+1));
 
-                                                        totalRatingMiniView.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ")ratings");
-                                                        totalRatings.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ") ratings");
-                                                        totalRatingsFigure.setText(String.valueOf((long) documentSnapshot.get("total_ratings")+1));
+                                                     //   totalRatingMiniView.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ")ratings");
+                                                     //   totalRatings.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ") ratings");
+                                                     //   totalRatingsFigure.setText(String.valueOf((long) documentSnapshot.get("total_ratings")+1));
 
-                                                        averageRating.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
-                                                        averageRatingMiniView.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
+                                                       // averageRating.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
+                                                       // averageRatingMiniView.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
 
                                                         for (int x = 0; x < 5; x++) {
                                                             TextView ratingfigures = (TextView) ratingsNoContainer.getChildAt(x);
