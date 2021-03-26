@@ -279,14 +279,22 @@ public class ProductDetailsActivity extends AppCompatActivity {
 //                            running_rating_query=true;
                             setRating(starPosition);
                             if (DBqueries.myRatedIds.contains(product_ID)) {
+                                 TextView oldRating=(TextView)ratingsNoContainer.getChildAt(5-initialRating-1);
+                                 TextView finalRating=(TextView)ratingsNoContainer.getChildAt(5-starPosition-1);
 
+
+                                Map<String, Object> updateRating=new HashMap<>();
+                                updateRating.put(initialRating-1+"_star",Long.parseLong(oldRating.getText().toString())-1);
+                                updateRating.put(starPosition+1+"_star",Long.parseLong(finalRating.getText().toString())+1);
+                                firebaseFirestore.collection("PRODUCTS").document(product_ID)
+                                        .update(updateRating);
                             } else {
 
                                 Map<String, Object> productRating = new HashMap<>();
                                 productRating.put(starPosition + 1 + "_star", (long) documentSnapshot.get(starPosition + 1 + "_star") + 1);
                                 productRating.put("average_rating", calculateAverageRating(starPosition + 1));
-                             //   productRating.put("total_ratings", (long) documentSnapshot.get("total_ratings") + 1);
-                                productRating.put("total_ratings", totalRatings());
+                                productRating.put("total_ratings", (long) documentSnapshot.get("total_ratings") + 1);
+
 
                                 firebaseFirestore.collection("PRODUCTS").document(product_ID)
                                         .update(productRating).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -539,7 +547,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
     }
 
-    private long calculateAverageRating(long currentUserRating) {
+    private float calculateAverageRating(long currentUserRating) {
         long totalStars = 0;
         for (int x = 1; x < 6; x++) {
             totalStars = totalStars + ((long) documentSnapshot.get(x + "_star")*x);
@@ -547,6 +555,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
         totalStars = totalStars + currentUserRating;
         return totalStars / ((long) documentSnapshot.get("total_ratings") + 1);
     }
+
     private long totalRatings(){
         long totalStars = 0;
         for (int x = 1; x < 6; x++) {
