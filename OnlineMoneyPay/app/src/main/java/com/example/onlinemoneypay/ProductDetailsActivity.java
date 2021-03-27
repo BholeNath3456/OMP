@@ -418,6 +418,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     signInDialog.show();
                 } else {
                     // to do: add to cart
+                    addToCartInFirebase(product_ID);
                 }
             }
         });
@@ -506,7 +507,24 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
     }
     public static void addToCartInFirebase(String product_ID){
-
+        Map<String, Object> updateList = new HashMap<>();
+        Map<String, Object> updateProduct = new HashMap<>();
+        String id = product_ID;
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                int i = Integer.parseInt(task.getResult().get("list_size").toString()) + 1;
+                // userWishListProductModelList.add(new UserWishListProductModel((int) task.getResult().get("list_size")+1,id));
+                updateList.put("list_size", (long) task.getResult().get("list_size") + 1);
+                updateProduct.put("product_ID_" + i, id);
+                FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+                        .update(updateList);
+                FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+                        .update(updateProduct);
+                Log.d(TAG, "onComplete: Added To Cart Successfully" + updateList + "  " + updateProduct);
+            }
+        });
     }
 
     public static void addWishListInFireBase(String product_ID) {
