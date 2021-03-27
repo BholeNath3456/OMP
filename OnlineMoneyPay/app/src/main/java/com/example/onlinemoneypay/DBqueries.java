@@ -230,10 +230,10 @@ public class DBqueries {
 
                     updates.put("product_ID_" + listSize, FieldValue.delete());
                     docRef.update(updates);
-                    if (ProductDetailsActivity.cartItem!=null&&MainActivity.cartItem!=null) {
-                        ProductDetailsActivity.cartItem.setActionView(null);
-                        MainActivity.cartItem.setActionView(null);
-                    }
+//                    if (ProductDetailsActivity.cartItem!=null&&MainActivity.cartItem!=null) {
+//                        ProductDetailsActivity.cartItem.setActionView(null);
+//                        MainActivity.cartItem.setActionView(null);
+//                    }
                 } else {
                     String error = task.getException().getMessage();
                     Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
