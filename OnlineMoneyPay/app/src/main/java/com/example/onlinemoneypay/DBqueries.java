@@ -190,7 +190,54 @@ public class DBqueries {
         });
 
     }
+    public static void removeCartlist(Context context, String productID) {
+      //  ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST = false;
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART");
+        Map<String, Object> updates = new HashMap<>();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (task.isSuccessful()) {
+                    long listSize = (long) task.getResult().get("list_size");
+                    int intlist = Integer.parseInt(String.valueOf(listSize));
+                    idList.clear();
+                    for (int x = 1; x <= intlist; x++) {
+                        idList.add(documentSnapshot.get("product_ID_" + x).toString());
+                        Log.d(TAG, "Original List: " + documentSnapshot.get("product_ID_" + x).toString());
+                    }
 
+                    for (int i = 0; i < intlist; i++) {
+                        String id = idList.get(i);
+                        if (id.contentEquals(productID)) {
+                            Log.d(TAG, "This is Remove " + idList.get(i));
+                            idList.remove(i);
+                            break;
+                        }
+                    }
+                    intlist--;
+                    for (int i = 0; i < idList.size(); i++) {
+                        int j = i + 1;
+                        updates.put("product_ID_" + j, idList.get(i));
+                        docRef.update(updates);
+                        Log.d(TAG, "After remove " + idList.get(i));
+                    }
+
+                    updates.put("list_size", intlist);
+                    docRef.update(updates);
+
+                    updates.put("product_ID_" + listSize, FieldValue.delete());
+                    docRef.update(updates);
+
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
     public static void loadRatingList(Context context,String productID) {
         myRatedIds.clear();
         myRating.clear();

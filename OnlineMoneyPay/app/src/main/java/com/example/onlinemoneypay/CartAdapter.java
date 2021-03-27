@@ -7,7 +7,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -97,7 +99,7 @@ public class CartAdapter extends RecyclerView.Adapter {
         private TextView offersApplied;
         private TextView coupensApplied;
         private TextView productQuantity;
-
+        private LinearLayout deletBtn;
         public CartItemViewholder(@NonNull View itemView) {
             super(itemView);
             productImage = itemView.findViewById(R.id.product_image);
@@ -109,6 +111,7 @@ public class CartAdapter extends RecyclerView.Adapter {
             offersApplied = itemView.findViewById(R.id.offers_applied);
             coupensApplied = itemView.findViewById(R.id.coupens_applied);
             productQuantity = itemView.findViewById(R.id.product_quantity);
+         deletBtn=itemView.findViewById(R.id.remove_item_btn);
         }
 
         private void setItemsDetails(String productID,String resource, String title, long freeCoupensNo, String productPriceText, String cuttedPriceText, long offersAppliedNo) {
@@ -168,6 +171,13 @@ public class CartAdapter extends RecyclerView.Adapter {
 
             }
         });
+            deletBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                   DBqueries.removeCartlist(itemView.getContext(),productID);
+                    Toast.makeText(itemView.getContext(), "Item Deleted..", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
