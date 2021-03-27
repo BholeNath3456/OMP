@@ -190,8 +190,9 @@ public class DBqueries {
         });
 
     }
+
     public static void removeCartlist(Context context, String productID) {
-      //  ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST = false;
+        //  ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST = false;
         DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART");
         Map<String, Object> updates = new HashMap<>();
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
@@ -229,7 +230,10 @@ public class DBqueries {
 
                     updates.put("product_ID_" + listSize, FieldValue.delete());
                     docRef.update(updates);
-
+                    if (ProductDetailsActivity.cartItem!=null&&MainActivity.cartItem!=null) {
+                        ProductDetailsActivity.cartItem.setActionView(null);
+                        MainActivity.cartItem.setActionView(null);
+                    }
                 } else {
                     String error = task.getException().getMessage();
                     Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
@@ -238,23 +242,24 @@ public class DBqueries {
         });
 
     }
-    public static void loadRatingList(Context context,String productID) {
+
+    public static void loadRatingList(Context context, String productID) {
         myRatedIds.clear();
         myRating.clear();
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_RATINGS")
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()){
-                    for(long x=0 ; x< (long)task.getResult().get("list_size"); x++){
-                        myRatedIds.add(task.getResult().get("product_ID_"+x).toString());
-                        myRating.add((long)task.getResult().get("rating_"+x));
-                        if(task.getResult().get("product_ID_"+x).toString().contentEquals(productID)&& ProductDetailsActivity.rateNowContainer!=null){
-                            ProductDetailsActivity.initialRating=Integer.parseInt(String.valueOf((long)task.getResult().get("rating_"+x)))-1;
+                if (task.isSuccessful()) {
+                    for (long x = 0; x < (long) task.getResult().get("list_size"); x++) {
+                        myRatedIds.add(task.getResult().get("product_ID_" + x).toString());
+                        myRating.add((long) task.getResult().get("rating_" + x));
+                        if (task.getResult().get("product_ID_" + x).toString().contentEquals(productID) && ProductDetailsActivity.rateNowContainer != null) {
+                            ProductDetailsActivity.initialRating = Integer.parseInt(String.valueOf((long) task.getResult().get("rating_" + x))) - 1;
                             ProductDetailsActivity.setRating(ProductDetailsActivity.initialRating);
                         }
                     }
-                }else {
+                } else {
                     String error = task.getException().getMessage();
                     Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
 

@@ -35,6 +35,7 @@ public class MyCartFragment extends Fragment {
     private static final String TAG = "MyCartFragment";
     public static List<CartItemModel> cartItemModelsList = new ArrayList<>();
     public static CartAdapter cartAdapter = new CartAdapter(cartItemModelsList);
+    public static  long listSize;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -97,7 +98,7 @@ public class MyCartFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    long listSize = (long) task.getResult().get("list_size");
+                     listSize = (long) task.getResult().get("list_size");
                     //  String id = task.getResult().get("product_ID_1").toString();
                     for (long x = 1; x <= listSize; x++) {
 

@@ -61,6 +61,7 @@ import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    public static  MenuItem cartItem;
 
     private FrameLayout frameLayout;
     private FirebaseUser currentUser;
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView userName, userEmail;
     private ImageView profileIcon;
     // User Profile..
-
+    public static long cartListSize;
 
     @SuppressLint("WrongConstant")
     @Override
@@ -203,6 +204,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                  if(task.isSuccessful()){
+                      cartListSize=(long) task.getResult().get("list_size");
+
+                  }else {
+                      String error = task.getException().getMessage();
+                      Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+                  }
+            }
+        });
+
     }
 
 
@@ -210,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        invalidateOptionsMenu();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
 
@@ -277,6 +293,30 @@ public class MainActivity extends AppCompatActivity {
 
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getMenuInflater().inflate(R.menu.main, menu);
+
+             cartItem=menu.findItem(R.id.main_cart_icon);
+            if(cartListSize>0){
+                cartItem.setActionView(R.layout.badge_layout);
+                ImageView badgeIcon=cartItem.getActionView().findViewById(R.id.badge_icon);
+                badgeIcon.setImageResource(R.drawable.ic_cart);
+                TextView badgeCount=cartItem.getActionView().findViewById(R.id.badge_count);
+                badgeCount.setText(String.valueOf(cartListSize));
+                invalidateOptionsMenu();
+                cartItem.getActionView().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (currentUser == null) {
+                            signInDialog.show();
+
+                        } else {
+                            gotoFragment("My Cart", new MyCartFragment(), CART_FRAGMENT);
+
+                        }
+                    }
+                });
+            }else {
+                cartItem.setActionView(null);
+            }
 
         }
 

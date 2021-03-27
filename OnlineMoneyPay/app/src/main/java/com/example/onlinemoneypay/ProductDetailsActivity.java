@@ -46,6 +46,7 @@ import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
 
 public class ProductDetailsActivity extends AppCompatActivity {
     private static final String TAG = "ProductDetailsActivity";
+    public static MenuItem cartItem;
     public static boolean running_rating_query = false;
     private ViewPager productImagesViewPager;
     private TextView productTitle;
@@ -420,6 +421,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     // to do: add to cart
                     addToCartInFirebase(product_ID);
                     Toast.makeText(ProductDetailsActivity.this, "Added to Cart Successfully", Toast.LENGTH_SHORT).show();
+
                 }
             }
         });
@@ -507,7 +509,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
 // sigin dialog
 
     }
-    public static void addToCartInFirebase(String product_ID){
+    private void addToCartInFirebase(String product_ID){
         Map<String, Object> updateList = new HashMap<>();
         Map<String, Object> updateProduct = new HashMap<>();
         String id = product_ID;
@@ -523,6 +525,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                         .update(updateList);
                 FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
                         .update(updateProduct);
+                   invalidateOptionsMenu();
                 Log.d(TAG, "onComplete: Added To Cart Successfully" + updateList + "  " + updateProduct);
             }
         });
@@ -553,7 +556,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+         invalidateOptionsMenu();
         if (currentUser != null) {
             coupenRedemptionLayout.setVisibility(View.VISIBLE);
 
@@ -624,6 +627,29 @@ public class ProductDetailsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.search_and_cart_icon, menu);
+         cartItem=menu.findItem(R.id.main_cart_icon);
+        if(MyCartFragment.listSize>0){
+            cartItem.setActionView(R.layout.badge_layout);
+            ImageView badgeIcon=cartItem.getActionView().findViewById(R.id.badge_icon);
+            badgeIcon.setImageResource(R.drawable.ic_cart);
+            TextView badgeCount=cartItem.getActionView().findViewById(R.id.badge_count);
+            badgeCount.setText(String.valueOf(MyCartFragment.listSize));
+            cartItem.getActionView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (currentUser == null) {
+                        signInDialog.show();
+                    } else {
+                        Intent cartIntent = new Intent(ProductDetailsActivity.this, MainActivity.class);
+                        showCart = true;
+                        startActivity(cartIntent);
+
+                    }
+                }
+            });
+        }else {
+            cartItem.setActionView(null);
+        }
         return true;
     }
 
