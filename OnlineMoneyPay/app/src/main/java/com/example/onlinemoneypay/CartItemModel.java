@@ -18,18 +18,20 @@ public class CartItemModel {
     }
 
 //    / cart item
-    private int productImage;
+    private String productID;
+    private String productImage;
     private String productTitle;
-    private int freeCoupens;
+    private long freeCoupens;
     private String productPrice;
     private String cuttedPrice;
-    private int productQuantity;
-    private int offersApplied;
-    private int coupensApplied;
+    private long productQuantity;
+    private long offersApplied;
+    private long coupensApplied;
 
 
-    public CartItemModel(int type, int productImage, String productTitle, int freeCoupens, String productPrice, String cuttedPrice, int productQuantity, int offersApplied, int coupensApplied) {
+    public CartItemModel(int type,String productID, String productImage, String productTitle, long freeCoupens, String productPrice, String cuttedPrice, long productQuantity, long offersApplied, long coupensApplied) {
         this.type = type;
+        this.productID=productID;
         this.productImage = productImage;
         this.productTitle = productTitle;
         this.freeCoupens = freeCoupens;
@@ -40,11 +42,19 @@ public class CartItemModel {
         this.coupensApplied = coupensApplied;
     }
 
-    public int getProductImage() {
+    public String getProductID() {
+        return productID;
+    }
+
+    public void setProductID(String productID) {
+        this.productID = productID;
+    }
+
+    public String getProductImage() {
         return productImage;
     }
 
-    public void setProductImage(int productImage) {
+    public void setProductImage(String productImage) {
         this.productImage = productImage;
     }
 
@@ -56,11 +66,11 @@ public class CartItemModel {
         this.productTitle = productTitle;
     }
 
-    public int getFreeCoupens() {
+    public long getFreeCoupens() {
         return freeCoupens;
     }
 
-    public void setFreeCoupens(int freeCoupens) {
+    public void setFreeCoupens(long freeCoupens) {
         this.freeCoupens = freeCoupens;
     }
 
@@ -80,7 +90,7 @@ public class CartItemModel {
         this.cuttedPrice = cuttedPrice;
     }
 
-    public int getProductQuantity() {
+    public long getProductQuantity() {
         return productQuantity;
     }
 
@@ -88,7 +98,7 @@ public class CartItemModel {
         this.productQuantity = productQuantity;
     }
 
-    public int getOffersApplied() {
+    public long getOffersApplied() {
         return offersApplied;
     }
 
@@ -96,7 +106,7 @@ public class CartItemModel {
         this.offersApplied = offersApplied;
     }
 
-    public int getCoupensApplied() {
+    public long getCoupensApplied() {
         return coupensApplied;
     }
 

@@ -3,14 +3,23 @@ package com.example.onlinemoneypay;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +32,9 @@ import java.util.List;
 public class MyCartFragment extends Fragment {
     private RecyclerView cartItemsRecyclerView;
     private Button continueBtn;
-
+    private static final String TAG = "MyCartFragment";
+    public static List<CartItemModel> cartItemModelsList = new ArrayList<>();
+    public static CartAdapter cartAdapter = new CartAdapter(cartItemModelsList);
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -70,23 +81,76 @@ public class MyCartFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_my_cart, container, false);
         cartItemsRecyclerView = view.findViewById(R.id.cart_items_recyclerview);
-         continueBtn=view.findViewById(R.id.cart_continue_btn);
-        LinearLayoutManager layoutManager =new LinearLayoutManager(getContext());
+        continueBtn = view.findViewById(R.id.cart_continue_btn);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         cartItemsRecyclerView.setLayoutManager(layoutManager);
-        List<CartItemModel> cartItemModelsList=new ArrayList<>();
-        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",2,"Rs. 3999/-","Rs. 9999/-",1,0,0));
-        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",1,"Rs. 2999/-","Rs. 8999/-",1,1,1));
-        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",0,"Rs. 1999/-","Rs. 5999/-",1,2,0));
-        cartItemModelsList.add(new CartItemModel(1,"Price (3 items)", "Rs. 1673","Free","Rs.9899","Rs 50090/"));
-        CartAdapter cartAdapter=new CartAdapter(cartItemModelsList);
-        cartItemsRecyclerView.setAdapter(cartAdapter);
-        cartAdapter.notifyDataSetChanged();
+
+//        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",2,"Rs. 3999/-","Rs. 9999/-",1,0,0));
+//        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",1,"Rs. 2999/-","Rs. 8999/-",1,1,1));
+//        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",0,"Rs. 1999/-","Rs. 5999/-",1,2,0));
+//        cartItemModelsList.add(new CartItemModel(1,"Price (3 items)", "Rs. 1673","Free","Rs.9899","Rs 50090/"));
+        cartItemModelsList.clear();
+
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    long listSize = (long) task.getResult().get("list_size");
+                    //  String id = task.getResult().get("product_ID_1").toString();
+                    for (long x = 1; x <= listSize; x++) {
+
+                        String id = task.getResult().get("product_ID_" + x).toString();
+                        /// /////////  loop start...
+                        FirebaseFirestore.getInstance().collection("PRODUCTS").document(id)
+                                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+//        cartItemModelsList.add(new CartItemModel(0,ID,R.drawable.mobile1,"Pixel 2",0,"Rs. 1999/-","Rs. 5999/-",1,2,0));
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                if (task.isSuccessful()) {
+                                    cartItemModelsList.add(new CartItemModel(CartItemModel.CART_ITEM
+                                            , documentSnapshot.get("product_ID").toString()
+                                            , documentSnapshot.get("product_image_1").toString()
+                                            , documentSnapshot.get("product_title").toString()
+                                            , (long) documentSnapshot.get("free_coupens")
+                                            , documentSnapshot.get("product_price").toString()
+                                            , documentSnapshot.get("cutted_price").toString()
+                                            , (long) 1, (long) 2, (long) 0));
+                                } else {
+                                    String error = task.getException().getMessage();
+                                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                                }
+
+                                cartItemsRecyclerView.setAdapter(cartAdapter);
+                                cartAdapter.notifyDataSetChanged();
+                            }
+                        });
+                        Log.d(TAG, "onComplete: " + listSize + id);
+
+                    }
+                    ////////////////////////////// looping
+
+
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+
+
+
+
 
         continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent deliveryIntent=new Intent(getContext(),AddAddressActivity.class);
+                Intent deliveryIntent = new Intent(getContext(), AddAddressActivity.class);
                 getContext().startActivity(deliveryIntent);
             }
         });

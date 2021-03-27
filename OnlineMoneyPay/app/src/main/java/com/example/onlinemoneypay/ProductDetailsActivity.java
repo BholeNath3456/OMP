@@ -275,6 +275,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     if (currentUser == null) {
                         signInDialog.show();
                     } else {
+
+
 //                        if (!running_rating_query) {
 //                            running_rating_query=true;
                             setRating(starPosition);
@@ -362,12 +364,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
                                                         TextView rating = (TextView) ratingsNoContainer.getChildAt(5-starPosition-1);
                                                         rating.setText(String.valueOf(Integer.parseInt(rating.getText().toString())+1));
 
-                                                     //   totalRatingMiniView.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ")ratings");
-                                                     //   totalRatings.setText("(" + (long) documentSnapshot.get("total_ratings")+1 + ") ratings");
-                                                     //   totalRatingsFigure.setText(String.valueOf((long) documentSnapshot.get("total_ratings")+1));
-
-                                                       // averageRating.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
-                                                       // averageRatingMiniView.setText(String.valueOf( calculateAverageRating(starPosition + 1)));
 
                                                         for (int x = 0; x < 5; x++) {
                                                             TextView ratingfigures = (TextView) ratingsNoContainer.getChildAt(x);
@@ -508,6 +504,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
 // sigin dialog
 
+    }
+    public static void addToCartInFirebase(String product_ID){
 
     }
 
@@ -560,8 +558,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     }
                 }
             });
-
-
             DBqueries.loadRatingList(ProductDetailsActivity.this, product_ID);
 
 
@@ -592,22 +588,18 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
     }
 
-    private float calculateAverageRating(long currentUserRating) {
-        long totalStars = 0;
-        for (int x = 1; x < 6; x++) {
-            totalStars = totalStars + ((long) documentSnapshot.get(x + "_star")*x);
-        }
-        totalStars = totalStars + currentUserRating;
-        return totalStars / ((long) documentSnapshot.get("total_ratings") + 1);
+    private void averageAndTotalRating(){
+//        updateRating.put("total_ratings",totalStars);
+//        updateRating.put("average_rating",avg);
+
+//        long totalStars = 0;
+//        for (long x = 1; x <=5; x++) {
+//            totalStars = totalStars + ((long) documentSnapshot.get(x+"_star"));
+//        }
+//        float avg=15/totalStars;
+
     }
 
-    private long totalRatings(){
-        long totalStars = 0;
-        for (int x = 1; x < 6; x++) {
-            totalStars = totalStars + ((long) documentSnapshot.get(x + "_star")*x);
-        }
-        return totalStars;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

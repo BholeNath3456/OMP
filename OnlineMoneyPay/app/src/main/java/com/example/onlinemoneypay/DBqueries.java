@@ -214,8 +214,6 @@ public class DBqueries {
                 }
             }
         });
-
-
     }
 }
 
