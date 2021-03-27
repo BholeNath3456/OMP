@@ -109,7 +109,7 @@ public class MyCartFragment extends Fragment {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-//        cartItemModelsList.add(new CartItemModel(0,ID,R.drawable.mobile1,"Pixel 2",0,"Rs. 1999/-","Rs. 5999/-",1,2,0));
+//        cartItemModelsList.add(new CartItemModel(1,"Price (3 items)", "Rs. 1673","Free","Rs.9899","Rs 50090/"));
                                 DocumentSnapshot documentSnapshot = task.getResult();
                                 if (task.isSuccessful()) {
                                     cartItemModelsList.add(new CartItemModel(CartItemModel.CART_ITEM
@@ -120,10 +120,14 @@ public class MyCartFragment extends Fragment {
                                             , documentSnapshot.get("product_price").toString()
                                             , documentSnapshot.get("cutted_price").toString()
                                             , (long) 1, (long) 2, (long) 0));
+
+
+
                                 } else {
                                     String error = task.getException().getMessage();
                                     Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
                                 }
+
 
                                 cartItemsRecyclerView.setAdapter(cartAdapter);
                                 cartAdapter.notifyDataSetChanged();
@@ -132,6 +136,9 @@ public class MyCartFragment extends Fragment {
                         Log.d(TAG, "onComplete: " + listSize + id);
 
                     }
+                    cartItemModelsList.add(new CartItemModel(CartItemModel.TOTAL_AMOUNT));
+                    cartItemsRecyclerView.setAdapter(cartAdapter);
+                    cartAdapter.notifyDataSetChanged();
                     ////////////////////////////// looping
 
 
