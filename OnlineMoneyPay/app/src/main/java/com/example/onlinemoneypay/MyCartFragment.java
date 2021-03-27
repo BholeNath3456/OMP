@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,8 +35,8 @@ public class MyCartFragment extends Fragment {
     private Button continueBtn;
     private static final String TAG = "MyCartFragment";
     public static List<CartItemModel> cartItemModelsList = new ArrayList<>();
-    public static CartAdapter cartAdapter = new CartAdapter(cartItemModelsList);
     public static  long listSize;
+    private TextView totalAmount;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -44,7 +45,6 @@ public class MyCartFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     public MyCartFragment() {
         // Required empty public constructor
     }
@@ -76,6 +76,8 @@ public class MyCartFragment extends Fragment {
         }
     }
 
+   // public static CartAdapter cartAdapter = new CartAdapter(cartItemModelsList);
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -83,9 +85,11 @@ public class MyCartFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_my_cart, container, false);
         cartItemsRecyclerView = view.findViewById(R.id.cart_items_recyclerview);
         continueBtn = view.findViewById(R.id.cart_continue_btn);
+        totalAmount=view.findViewById(R.id.total_cart_amount);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         cartItemsRecyclerView.setLayoutManager(layoutManager);
+        CartAdapter cartAdapter = new CartAdapter(cartItemModelsList,totalAmount);
 
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",2,"Rs. 3999/-","Rs. 9999/-",1,0,0));
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",1,"Rs. 2999/-","Rs. 8999/-",1,1,1));
