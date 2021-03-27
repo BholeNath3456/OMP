@@ -419,6 +419,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                 } else {
                     // to do: add to cart
                     addToCartInFirebase(product_ID);
+                    Toast.makeText(ProductDetailsActivity.this, "Added to Cart Successfully", Toast.LENGTH_SHORT).show();
                 }
             }
         });

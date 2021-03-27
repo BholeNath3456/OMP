@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +22,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
 
     private List<WishlistModel> wishlistModelList;
     private Boolean wishlist;
-
+     private int lastPosition=-1;
     public WishlistAdapter(List<WishlistModel> wishlistModelList,Boolean wishlist) {
         this.wishlistModelList = wishlistModelList;
         this.wishlist=wishlist;
@@ -49,6 +51,12 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         String product_id=wishlistModelList.get(position).getProductID();
         viewHolder.setData(product_id,resource,title,freeCoupens,rating,totalRatings,productPrice,cuttedPrice,paymentMethhod);
 
+
+        if(lastPosition<position){
+            Animation animation= AnimationUtils.loadAnimation(viewHolder.itemView.getContext(),R.anim.fade_in);
+            viewHolder.itemView.setAnimation(animation);
+            lastPosition=position;
+        }
     }
 
     @Override

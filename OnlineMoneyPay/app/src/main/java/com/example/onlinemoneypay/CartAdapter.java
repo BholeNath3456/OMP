@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,6 +24,7 @@ import java.util.List;
 public class CartAdapter extends RecyclerView.Adapter {
 
     private List<CartItemModel> cartItemModelList;
+    private int lastPosition=-1;
 
     public CartAdapter(List<CartItemModel> cartItemModelList) {
         this.cartItemModelList = cartItemModelList;
@@ -80,6 +83,11 @@ public class CartAdapter extends RecyclerView.Adapter {
                 break;
             default:
                 return;
+        }
+        if(lastPosition<position){
+            Animation animation= AnimationUtils.loadAnimation(viewHolder.itemView.getContext(),R.anim.fade_in);
+            viewHolder.itemView.setAnimation(animation);
+            lastPosition=position;
         }
 
     }
