@@ -22,7 +22,10 @@ public class DeliveryActivity extends AppCompatActivity {
     private RecyclerView deliveryRecyclerView;
     private Button changeORaddNewAddressBtn;
     private TextView totalAmount;
-    public static final int SELECT_ADDRESS=0;
+    private TextView fullname, fullAddress, pincode;
+
+    public static final int SELECT_ADDRESS = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,18 +37,22 @@ public class DeliveryActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Delivery");
 
         deliveryRecyclerView = findViewById(R.id.delivery_recyclerview);
-        changeORaddNewAddressBtn=findViewById(R.id.change_or_add_address_btn);
-        totalAmount=findViewById(R.id.total_cart_amount);
+        changeORaddNewAddressBtn = findViewById(R.id.change_or_add_address_btn);
+        totalAmount = findViewById(R.id.total_cart_amount);
 
-        LinearLayoutManager layoutManager =new LinearLayoutManager(this);
+        fullname = findViewById(R.id.fullname);
+        fullAddress = findViewById(R.id.address);
+        pincode = findViewById(R.id.pincode);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         deliveryRecyclerView.setLayoutManager(layoutManager);
-        List<CartItemModel> cartItemModelsList=new ArrayList<>();
+   //     List<CartItemModel> cartItemModelsList = new ArrayList<>();
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",2,"Rs. 3999/-","Rs. 9999/-",1,0,0));
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",1,"Rs. 2999/-","Rs. 8999/-",1,1,1));
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",0,"Rs. 1999/-","Rs. 5999/-",1,2,0));
 //        cartItemModelsList.add(new CartItemModel(1,"Price (3 items)", "Rs. 1673","Free","Rs.9899","Rs 50090/"));
-        CartAdapter cartAdapter=new CartAdapter(cartItemModelsList,totalAmount);
+        CartAdapter cartAdapter = new CartAdapter(MyCartFragment.cartItemModelsList, totalAmount);
         deliveryRecyclerView.setAdapter(cartAdapter);
         cartAdapter.notifyDataSetChanged();
 
@@ -53,16 +60,22 @@ public class DeliveryActivity extends AppCompatActivity {
         changeORaddNewAddressBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent myAddressesIntent=new Intent(DeliveryActivity.this, MyAddressesActivity.class);
-                myAddressesIntent.putExtra("MODE",SELECT_ADDRESS);
+                Intent myAddressesIntent = new Intent(DeliveryActivity.this, MyAddressesActivity.class);
+                myAddressesIntent.putExtra("MODE", SELECT_ADDRESS);
                 startActivity(myAddressesIntent);
             }
         });
+        fullname.setText(DBqueries.addressesModelList.get(DBqueries.selectedAddress).getFullname());
+        fullAddress.setText(DBqueries.addressesModelList.get(DBqueries.selectedAddress).getAddress());
+        pincode.setText(DBqueries.addressesModelList.get(DBqueries.selectedAddress).getPincode());
+
+
     }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if(id==android.R.id.home){
+        if (id == android.R.id.home) {
             finish();
             return true;
         }
