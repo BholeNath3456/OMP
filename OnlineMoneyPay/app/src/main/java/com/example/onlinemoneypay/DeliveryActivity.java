@@ -17,11 +17,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.onlinemoneypay.MyCartFragment.cartAdapter;
+
 public class DeliveryActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private RecyclerView deliveryRecyclerView;
     private Button changeORaddNewAddressBtn;
-    private TextView totalAmount;
+   // private TextView totalAmount;
     private TextView fullname, fullAddress, pincode;
 
     public static final int SELECT_ADDRESS = 0;
@@ -38,21 +40,24 @@ public class DeliveryActivity extends AppCompatActivity {
 
         deliveryRecyclerView = findViewById(R.id.delivery_recyclerview);
         changeORaddNewAddressBtn = findViewById(R.id.change_or_add_address_btn);
-        totalAmount = findViewById(R.id.total_cart_amount);
+      //  totalAmount = findViewById(R.id.total_cart_amount);
 
         fullname = findViewById(R.id.fullname);
         fullAddress = findViewById(R.id.address);
         pincode = findViewById(R.id.pincode);
+      //  totalAmount.setText(MyCartFragment.cartItemModelsList.get(CartItemModel.));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         deliveryRecyclerView.setLayoutManager(layoutManager);
-   //     List<CartItemModel> cartItemModelsList = new ArrayList<>();
+        //     List<CartItemModel> cartItemModelsList = new ArrayList<>();
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",2,"Rs. 3999/-","Rs. 9999/-",1,0,0));
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",1,"Rs. 2999/-","Rs. 8999/-",1,1,1));
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",0,"Rs. 1999/-","Rs. 5999/-",1,2,0));
 //        cartItemModelsList.add(new CartItemModel(1,"Price (3 items)", "Rs. 1673","Free","Rs.9899","Rs 50090/"));
-        CartAdapter cartAdapter = new CartAdapter(MyCartFragment.cartItemModelsList, totalAmount);
+
+    //    CartAdapter cartAdapter = new CartAdapter(MyCartFragment.cartItemModelsList, totalAmount);
+
         deliveryRecyclerView.setAdapter(cartAdapter);
         cartAdapter.notifyDataSetChanged();
 
