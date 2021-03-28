@@ -284,7 +284,8 @@ public class DBqueries {
                     Intent deliveryIntent;
                     if (listSize == 0) {
                         deliveryIntent = new Intent(context, AddAddressActivity.class);
-                    } else {
+                        deliveryIntent.putExtra("INTENT","deliveryIntent");
+                     } else {
 
                         for (long x = 1; x < listSize + 1; x++) {
                             addressesModelList.add(new AddressesModel(task.getResult().get("fullname_" + x).toString(),

@@ -37,7 +37,6 @@ public class MyCartFragment extends Fragment {
     public static List<CartItemModel> cartItemModelsList = new ArrayList<>();
     public static  long listSize;
     private TextView totalAmount;
-    public static CartAdapter cartAdapter;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -90,7 +89,7 @@ public class MyCartFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         cartItemsRecyclerView.setLayoutManager(layoutManager);
-         cartAdapter = new CartAdapter(cartItemModelsList,totalAmount);
+        CartAdapter cartAdapter = new CartAdapter(cartItemModelsList,totalAmount,true);
 
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",2,"Rs. 3999/-","Rs. 9999/-",1,0,0));
 //        cartItemModelsList.add(new CartItemModel(0,R.drawable.mobile1,"Pixel 2",1,"Rs. 2999/-","Rs. 8999/-",1,1,1));

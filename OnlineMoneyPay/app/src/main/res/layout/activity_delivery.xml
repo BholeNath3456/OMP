@@ -69,17 +69,7 @@
 <!--            android:orientation="vertical"-->
 <!--            android:paddingStart="16dp">-->
 
-<!--            <TextView-->
-<!--                android:id="@+id/total_cart_amount"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Rs. 4999/"-->
-<!--                android:textColor="@color/black"-->
-<!--                android:textSize="20sp"-->
-<!--                android:textStyle="bold"-->
-<!--                android:visibility="visible" />-->
-
-<!--            <TextView-->
+        <!--            <TextView-->
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:text="Total Amount"-->
@@ -87,6 +77,16 @@
 <!--                android:textStyle="bold" />-->
 
 <!--        </LinearLayout>-->
+
+        <TextView
+            android:id="@+id/total_cart_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rs. 4999/"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/cart_continue_btn"
