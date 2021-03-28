@@ -140,7 +140,9 @@ public class MyCartFragment extends Fragment {
                         Log.d(TAG, "onComplete: " + listSize + id);
 
                     }
-                    cartItemModelsList.add(new CartItemModel(CartItemModel.TOTAL_AMOUNT));
+                    if(listSize!=0) {
+                        cartItemModelsList.add(new CartItemModel(CartItemModel.TOTAL_AMOUNT));
+                    }
                     cartItemsRecyclerView.setAdapter(cartAdapter);
                     cartAdapter.notifyDataSetChanged();
                     ////////////////////////////// looping
