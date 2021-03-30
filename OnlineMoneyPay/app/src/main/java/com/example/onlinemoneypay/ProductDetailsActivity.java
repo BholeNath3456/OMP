@@ -45,6 +45,7 @@ import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
 
 public class ProductDetailsActivity extends AppCompatActivity {
     private static final String TAG = "ProductDetailsActivity";
+    private List<String> idList = new ArrayList<>();
     private ViewPager productImagesViewPager;
     private TextView productTitle;
     private TextView averageRatingMiniView;
@@ -102,7 +103,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private String product_ID;
     private FirebaseUser currentUser;
-    public static List<UserWishListProductModel> userWishListProductModelList =new ArrayList<>();
+    public static List<UserWishListProductModel> userWishListProductModelList = new ArrayList<>();
 
 
     @Override
@@ -229,11 +230,11 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     signInDialog.show();
                 } else {
                     if (ALREADY_ADDED_TO_WISHLIST) {
-                        ALREADY_ADDED_TO_WISHLIST = false;
+                      //  ALREADY_ADDED_TO_WISHLIST = false;
                         addToWishlistBtn.setSupportImageTintList(ColorStateList.valueOf(Color.parseColor("#9e9e9e")));
-
+                        Toast.makeText(ProductDetailsActivity.this, "Already Added to Wishlist.", Toast.LENGTH_SHORT).show();
                     } else {
-                        ALREADY_ADDED_TO_WISHLIST = true;
+                      //  ALREADY_ADDED_TO_WISHLIST = true;
                         addToWishlistBtn.setSupportImageTintList(getResources().getColorStateList(R.color.red));
                         addWishListInFireBase(product_ID);
                     }
@@ -387,27 +388,27 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
 
     }
-    public static void  addWishListInFireBase(String product_ID){
+
+    public static void addWishListInFireBase(String product_ID) {
         Map<String, Object> updateList = new HashMap<>();
         Map<String, Object> updateProduct = new HashMap<>();
-        String id=product_ID;
+        String id = product_ID;
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                int i=Integer.parseInt(task.getResult().get("list_size").toString())+1;
-              // userWishListProductModelList.add(new UserWishListProductModel((int) task.getResult().get("list_size")+1,id));
-                updateList.put("list_size", (long) task.getResult().get("list_size")+1);
-                updateProduct.put("product_ID_"+i,id);
+                int i = Integer.parseInt(task.getResult().get("list_size").toString()) + 1;
+                // userWishListProductModelList.add(new UserWishListProductModel((int) task.getResult().get("list_size")+1,id));
+                updateList.put("list_size", (long) task.getResult().get("list_size") + 1);
+                updateProduct.put("product_ID_" + i, id);
                 FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                         .update(updateList);
                 FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                         .update(updateProduct);
-                Log.d(TAG, "onComplete: Added To Wishlist"+ updateList+"  "+updateProduct);
+                Log.d(TAG, "onComplete: Added To Wishlist" + updateList + "  " + updateProduct);
             }
         });
     }
-
 
 
     @Override
@@ -416,9 +417,40 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
         if (currentUser != null) {
             coupenRedemptionLayout.setVisibility(View.VISIBLE);
+            checkWishListIsAdded();
         }
 
     }
+
+    private void checkWishListIsAdded() {
+        idList.clear();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                long listSize = (long) task.getResult().get("list_size");
+                //  String id = task.getResult().get("product_ID_1").toString();
+
+                if (task.isSuccessful()) {
+                    for (long x = 1; x <= listSize; x++) {
+                        idList.add(task.getResult().get("product_ID_"+x).toString());
+                        if(idList.contains(product_ID)){
+                            ALREADY_ADDED_TO_WISHLIST=true;
+                            addToWishlistBtn.setSupportImageTintList(getResources().getColorStateList(R.color.red));
+                        }else{
+                            ALREADY_ADDED_TO_WISHLIST=false;
+                            addToWishlistBtn.setSupportImageTintList(ColorStateList.valueOf(Color.parseColor("#9e9e9e")));
+
+                        }
+                    }
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(ProductDetailsActivity.this, error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
     public static void showDialogRecyclerView() {
         if (coupensRecyclerView.getVisibility() == View.GONE) {
