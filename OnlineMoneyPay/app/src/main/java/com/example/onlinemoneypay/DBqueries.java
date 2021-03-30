@@ -1,6 +1,7 @@
 package com.example.onlinemoneypay;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -8,11 +9,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -23,11 +27,17 @@ import java.util.List;
 import java.util.Map;
 
 public class DBqueries {
+    private static final String TAG = "DBqueries";
     public static FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     public static String email, name, profile;
     public static List<CategoryModel> categoryModelList = new ArrayList<CategoryModel>();
     public static List<List<HomePageModel>> lists = new ArrayList<>();
     public static List<String> loadedCategoriesNames = new ArrayList<>();
+    public static List<String> idList = new ArrayList<>();
+    public static List<String> myRatedIds = new ArrayList<>();
+    public static List<Long> myRating = new ArrayList<>();
+    public static int selectedAddress = -1;
+    public static List<AddressesModel> addressesModelList = new ArrayList<>();
 
 
     public static void loadCategories(RecyclerView categoryRecyclerView, Context context) {
@@ -134,19 +144,11 @@ public class DBqueries {
                 });
     }
 
-    public static void  addWishList( Context context, String productID){
-        Map<String, Object> updateList = new HashMap<>();
-        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                updateList.put("list_size", (long) task.getResult().get("list_size")+1);
-              //  userWishListProductModelList.add(new UserWishListProductModel((long) task.getResult().get("list_size")+1,productID));
-            }
-        });
-    }
 
     public static void removeWishlist(Context context, String productID) {
+        ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST = false;
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST");
+        Map<String, Object> updates = new HashMap<>();
         FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_WISHLIST")
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -154,20 +156,159 @@ public class DBqueries {
                 DocumentSnapshot documentSnapshot = task.getResult();
                 if (task.isSuccessful()) {
                     long listSize = (long) task.getResult().get("list_size");
-                    //  String id = task.getResult().get("product_ID_1").toString();
-                    for (long x = 1; x <= listSize; x++) {
-                        String id = task.getResult().get("product_ID_" + x).toString();
-                        if(id.equals(productID)){
+                    int intlist = Integer.parseInt(String.valueOf(listSize));
+                    idList.clear();
+                    for (int x = 1; x <= intlist; x++) {
+                        idList.add(documentSnapshot.get("product_ID_" + x).toString());
+                        Log.d(TAG, "Original List: " + documentSnapshot.get("product_ID_" + x).toString());
+                    }
 
+                    for (int i = 0; i < intlist; i++) {
+                        String id = idList.get(i);
+                        if (id.contentEquals(productID)) {
+                            Log.d(TAG, "This is Remove " + idList.get(i));
+                            idList.remove(i);
+                            break;
                         }
                     }
+                    intlist--;
+                    for (int i = 0; i < idList.size(); i++) {
+                        int j = i + 1;
+                        updates.put("product_ID_" + j, idList.get(i));
+                        docRef.update(updates);
+                        Log.d(TAG, "After remove " + idList.get(i));
+                    }
+
+                    updates.put("list_size", intlist);
+                    docRef.update(updates);
+
+                    updates.put("product_ID_" + listSize, FieldValue.delete());
+                    docRef.update(updates);
+
                 } else {
                     String error = task.getException().getMessage();
                     Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
     }
 
+    public static void removeCartlist(Context context, String productID) {
+        //  ProductDetailsActivity.ALREADY_ADDED_TO_WISHLIST = false;
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART");
+        Map<String, Object> updates = new HashMap<>();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (task.isSuccessful()) {
+                    long listSize = (long) task.getResult().get("list_size");
+                    int intlist = Integer.parseInt(String.valueOf(listSize));
+                    idList.clear();
+                    for (int x = 1; x <= intlist; x++) {
+                        idList.add(documentSnapshot.get("product_ID_" + x).toString());
+                        Log.d(TAG, "Original List: " + documentSnapshot.get("product_ID_" + x).toString());
+                    }
+
+                    for (int i = 0; i < intlist; i++) {
+                        String id = idList.get(i);
+                        if (id.contentEquals(productID)) {
+                            Log.d(TAG, "This is Remove " + idList.get(i));
+                            idList.remove(i);
+                            break;
+                        }
+                    }
+                    intlist--;
+                    for (int i = 0; i < idList.size(); i++) {
+                        int j = i + 1;
+                        updates.put("product_ID_" + j, idList.get(i));
+                        docRef.update(updates);
+                        Log.d(TAG, "After remove " + idList.get(i));
+                    }
+
+                    updates.put("list_size", intlist);
+                    docRef.update(updates);
+
+                    updates.put("product_ID_" + listSize, FieldValue.delete());
+                    docRef.update(updates);
+//                    if (ProductDetailsActivity.cartItem!=null&&MainActivity.cartItem!=null) {
+//                        ProductDetailsActivity.cartItem.setActionView(null);
+//                        MainActivity.cartItem.setActionView(null);
+//                    }
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
+    public static void loadRatingList(Context context, String productID) {
+        myRatedIds.clear();
+        myRating.clear();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_RATINGS")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (long x = 0; x < (long) task.getResult().get("list_size"); x++) {
+                        myRatedIds.add(task.getResult().get("product_ID_" + x).toString());
+                        myRating.add((long) task.getResult().get("rating_" + x));
+                        if (task.getResult().get("product_ID_" + x).toString().contentEquals(productID) && ProductDetailsActivity.rateNowContainer != null) {
+                            ProductDetailsActivity.initialRating = Integer.parseInt(String.valueOf((long) task.getResult().get("rating_" + x))) - 1;
+                            ProductDetailsActivity.setRating(ProductDetailsActivity.initialRating);
+                        }
+                    }
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+    }
+
+    public static void loadAddresses(Context context) {
+        addressesModelList.clear();
+        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_ADDRESSES")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+
+                if (task.isSuccessful()) {
+                    long listSize = (long) documentSnapshot.get("list_size");
+                    Intent deliveryIntent;
+                    if (listSize == 0) {
+                        deliveryIntent = new Intent(context, AddAddressActivity.class);
+                        deliveryIntent.putExtra("INTENT","deliveryIntent");
+                     } else {
+
+                        for (long x = 1; x < listSize + 1; x++) {
+                            addressesModelList.add(new AddressesModel(task.getResult().get("fullname_" + x).toString(),
+                                    task.getResult().get("address_" + x).toString(),
+                                    task.getResult().get("pincode_" + x).toString(),
+                                    (boolean) task.getResult().get("selected_" + x)));
+                            if ((boolean) task.getResult().get("selected_" + x)) {
+                                selectedAddress = Integer.parseInt(String.valueOf(x - 1));
+                            }
+                        }
+
+                        deliveryIntent = new Intent(context, DeliveryActivity.class);
+                    }
+                    context.startActivity(deliveryIntent);
+
+                } else {
+                    String error = task.getException().getMessage();
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+    }
 
 }
+

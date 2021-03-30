@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.onlinemoneypay.R;
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,7 +33,9 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.annotation.NonNull;
@@ -48,6 +51,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
@@ -55,6 +61,7 @@ import static com.example.onlinemoneypay.RegisterActivity.setSignUpFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    public static MenuItem cartItem;
 
     private FrameLayout frameLayout;
     private FirebaseUser currentUser;
@@ -77,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView userName, userEmail;
     private ImageView profileIcon;
     // User Profile..
-
+    public static long cartListSize;
 
     @SuppressLint("WrongConstant")
     @Override
@@ -199,9 +206,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
+//
+//        FirebaseFirestore.getInstance().collection("USERS").document(FirebaseAuth.getInstance().getUid()).collection("USER_DATA").document("MY_CART")
+//                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if(task.isSuccessful()){
+//                    cartListSize=(long) task.getResult().get("list_size");
+//
+//                }else {
+//                    String error = task.getException().getMessage();
+//                    Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
+//
+//        invalidateOptionsMenu();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
 
@@ -218,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
                         userName.setText(DBqueries.name);
                         userEmail.setText(DBqueries.email);
                         if (DBqueries.profile.isEmpty()) {
-                             profileIcon.setVisibility(View.VISIBLE);
+                            profileIcon.setVisibility(View.VISIBLE);
                         } else {
                             profileIcon.setVisibility(View.INVISIBLE);
                             Glide.with(MainActivity.this).load(DBqueries.profile).apply(new RequestOptions().placeholder(R.drawable.profile_placeholder)).into(userProfile);
@@ -269,7 +293,31 @@ public class MainActivity extends AppCompatActivity {
 
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getMenuInflater().inflate(R.menu.main, menu);
-
+            /// badge settings
+            //             cartItem=menu.findItem(R.id.main_cart_icon);
+//            if(cartListSize>0){
+//                cartItem.setActionView(R.layout.badge_layout);
+//                ImageView badgeIcon=cartItem.getActionView().findViewById(R.id.badge_icon);
+//                badgeIcon.setImageResource(R.drawable.ic_cart);
+//                TextView badgeCount=cartItem.getActionView().findViewById(R.id.badge_count);
+//                badgeCount.setText(String.valueOf(cartListSize));
+//                invalidateOptionsMenu();
+//                cartItem.getActionView().setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        if (currentUser == null) {
+//                            signInDialog.show();
+//
+//                        } else {
+//                            gotoFragment("My Cart", new MyCartFragment(), CART_FRAGMENT);
+//
+//                        }
+//                    }
+//                });
+//            }else {
+//                cartItem.setActionView(null);
+//            }
+/// badge settings
         }
 
         return true;
